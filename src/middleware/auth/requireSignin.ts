@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../helpers/jwtHelpers";
-import envVariables from "../config/index";
-import { userPayload } from "../interfaces/userPayload";
+import { verifyToken } from "../../helpers/jwtHelpers";
+import envVariables from "../../config/index";
+import { userPayload } from "../../interfaces/userPayload";
 
 const { JWT_SECRET } = envVariables;
 
@@ -12,7 +12,6 @@ export const requireSignin = (
 ) => {
   try {
     const { accessToken } = req.cookies;
-    console.log("Access Token:", accessToken);
 
     if (!accessToken) {
       return res.status(401).json({ message: "Access Denied" });

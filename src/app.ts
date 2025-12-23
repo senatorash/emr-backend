@@ -1,7 +1,9 @@
 import express, { Request, Response } from "express";
+import cookieParser from "cookie-parser";
 import adminRouter from "./routes/adminRoutes";
 import authRoutes from "./routes/authRoutes";
-import cookieParser from "cookie-parser";
+import patientRouter from "./routes/patientRoutes";
+import familyRouter from "./routes/familyRoutes";
 
 const app = express();
 
@@ -14,5 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/admin", adminRouter);
 app.use("/auth", authRoutes);
+app.use("/patients", patientRouter);
+app.use("/family", familyRouter);
 
 export default app;

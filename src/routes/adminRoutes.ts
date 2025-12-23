@@ -3,8 +3,8 @@ import {
   createSuperAdmin,
   createStaffAccount,
 } from "../controllers/adminController";
-import { authorizeSuperAdmin } from "../middleware/requireSuperAdmin";
-import { requireSignin } from "../middleware/requireSignin";
+import { authorizeSuperAdmin } from "../middleware/auth/requireSuperAdmin";
+import { requireSignin } from "../middleware/auth/requireSignin";
 
 const adminRouter = express.Router();
 

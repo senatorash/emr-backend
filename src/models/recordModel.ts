@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 export interface Irecord extends mongoose.Document {
-  patientId: mongoose.Types.ObjectId;
+  personId: mongoose.Types.ObjectId;
   vitals: {
     bloodPressure?: string;
     pulse?: number;
@@ -18,7 +18,7 @@ export interface Irecord extends mongoose.Document {
 const recordSchema = new Schema<Irecord>(
   {
     // record fields
-    patientId: {
+    personId: {
       type: Schema.Types.ObjectId,
       ref: "Patient",
     },

@@ -1,10 +1,10 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
 export interface Ipatient extends mongoose.Document {
   patientId?: string;
-  FullName: string;
+  fullName: string;
   dob: Date;
   gender: string;
   phone: string;
@@ -12,6 +12,8 @@ export interface Ipatient extends mongoose.Document {
   emergencyContact: string;
   nextOfKin: string;
   bloodGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  nin: string;
+  familyMembers: mongoose.Types.ObjectId[];
 }
 
 const patientSchema = new Schema<Ipatient>(
@@ -20,8 +22,9 @@ const patientSchema = new Schema<Ipatient>(
     patientId: {
       type: String,
       unique: true,
+      index: true,
     },
-    FullName: {
+    fullName: {
       type: String,
       required: true,
     },
@@ -34,6 +37,10 @@ const patientSchema = new Schema<Ipatient>(
       required: true,
     },
     phone: {
+      type: String,
+      required: true,
+    },
+    nin: {
       type: String,
       required: true,
     },
@@ -54,6 +61,12 @@ const patientSchema = new Schema<Ipatient>(
       enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
       required: true,
     },
+    familyMembers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "FamilyMember",
+      },
+    ],
   },
   { timestamps: true }
 );
