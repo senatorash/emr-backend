@@ -1,20 +1,7 @@
 import mongoose from "mongoose";
+import { Ipatient } from "../interfaces/model.interface";
 
 const Schema = mongoose.Schema;
-
-export interface Ipatient extends mongoose.Document {
-  patientId?: string;
-  fullName: string;
-  dob: Date;
-  gender: string;
-  phone: string;
-  address: string;
-  emergencyContact: string;
-  nextOfKin: string;
-  bloodGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-  nin: string;
-  familyMembers: mongoose.Types.ObjectId[];
-}
 
 const patientSchema = new Schema<Ipatient>(
   {

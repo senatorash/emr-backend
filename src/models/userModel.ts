@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+import { Iuser } from "../interfaces/model.interface";
 
-export interface Iuser extends mongoose.Document {
-  role: "super_admin" | "nurse" | "doctor";
-  fullName: string;
-  email: string;
-  password: string;
-}
+const Schema = mongoose.Schema;
 
 const userSchema = new Schema<Iuser>(
   // user fields

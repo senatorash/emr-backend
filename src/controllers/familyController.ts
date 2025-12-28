@@ -4,7 +4,8 @@ import FamilyMember from "../models/familyModel";
 
 export const addFamilyMember = async (req: Request, res: Response) => {
   try {
-    const { patientId, fullName, dob, relationship, gender } = req.body;
+    const { patientId, phoneNumber, fullName, dob, relationship, gender } =
+      req.body;
 
     // comfirm if the patient exists with the given patientId
     const patient = await Patient.findOne({ patientId });
@@ -13,8 +14,25 @@ export const addFamilyMember = async (req: Request, res: Response) => {
         message: "We can't add a family member for a non-existent patient",
       });
     }
+    const familyMemberExists = await FamilyMember.findOne({
+      phoneNumber,
+      dob,
+    });
+
+    if (familyMemberExists) {
+      return res
+        .status(400)
+        .json({ message: "This family member already exists" });
+    }
     // Count existing family members for the patient to easily append a letter to the patient ID
     const familyCount = await FamilyMember.countDocuments({ patientId });
+
+    // must not exceed 8 family members
+    if (familyCount >= 8) {
+      return res.status(400).json({
+        message: "Cannot add more than 8 family members for a patient",
+      });
+    }
 
     // converting the number of count to a letter
     const letter = String.fromCharCode(65 + familyCount);
@@ -25,6 +43,7 @@ export const addFamilyMember = async (req: Request, res: Response) => {
     // Create and save the new family member
     const newMember = await FamilyMember.create({
       patientId,
+      phoneNumber,
       fullName,
       dob,
       relationship,
@@ -36,6 +55,7 @@ export const addFamilyMember = async (req: Request, res: Response) => {
     await newMember.save();
     // Save the updated patient document with the new family member reference
     await patient.save();
+
     res
       .status(201)
       .json({ message: "Family member added successfully", data: newMember });

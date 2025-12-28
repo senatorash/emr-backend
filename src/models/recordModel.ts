@@ -1,26 +1,20 @@
 import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+import { Irecord } from "../interfaces/model.interface";
 
-export interface Irecord extends mongoose.Document {
-  personId: mongoose.Types.ObjectId;
-  vitals: {
-    bloodPressure?: string;
-    pulse?: number;
-    temperature?: number;
-  };
-  complaints?: string;
-  diagnosis?: string;
-  treatment?: string;
-  UserId?: mongoose.Types.ObjectId;
-  date: Date;
-}
+const Schema = mongoose.Schema;
 
 const recordSchema = new Schema<Irecord>(
   {
     // record fields
+    patientId: {
+      type: String,
+      required: true,
+      index: true,
+    },
     personId: {
-      type: Schema.Types.ObjectId,
-      ref: "Patient",
+      type: String,
+      required: true,
+      index: true,
     },
     vitals: {
       bloodPressure: { type: String },
@@ -36,9 +30,8 @@ const recordSchema = new Schema<Irecord>(
     diagnosis: {
       type: String,
     },
-    UserId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    CreatedBy: {
+      type: String,
     },
     date: {
       type: Date,

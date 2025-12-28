@@ -4,6 +4,7 @@ import adminRouter from "./routes/adminRoutes";
 import authRoutes from "./routes/authRoutes";
 import patientRouter from "./routes/patientRoutes";
 import familyRouter from "./routes/familyRoutes";
+import recordRouter from "./routes/recordRoutes";
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.use("/admin", adminRouter);
 app.use("/auth", authRoutes);
 app.use("/patients", patientRouter);
 app.use("/family", familyRouter);
+app.use("/records", recordRouter);
 
 export default app;

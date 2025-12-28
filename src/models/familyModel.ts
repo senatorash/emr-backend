@@ -1,15 +1,7 @@
 import mongoose from "mongoose";
+import { Ifamily } from "../interfaces/model.interface";
 
 const Schema = mongoose.Schema;
-
-export interface Ifamily extends mongoose.Document {
-  patientId: string;
-  fullName: string;
-  dob: Date;
-  relationship: string;
-  gender: string;
-  familyMemberId?: string;
-}
 
 const familySchema = new Schema<Ifamily>({
   // family fields
@@ -21,6 +13,11 @@ const familySchema = new Schema<Ifamily>({
   familyMemberId: {
     type: String,
     unique: true,
+  },
+
+  phoneNumber: {
+    type: String,
+    required: true,
   },
 
   fullName: {
