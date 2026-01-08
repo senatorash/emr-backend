@@ -11,13 +11,19 @@ export const requireSignin = (
   next: NextFunction
 ) => {
   try {
-    const { accessToken } = req.cookies;
+    const authHeader = req.headers.authorization;
 
-    if (!accessToken) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Access Denied" });
     }
 
-    const decodedUser = verifyToken(accessToken, JWT_SECRET) as userPayload;
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Access Denied" });
+    }
+
+    const decodedUser = verifyToken(token, JWT_SECRET) as userPayload;
     if (!decodedUser) {
       return res.status(403).json({ message: "Invalid token" });
     }

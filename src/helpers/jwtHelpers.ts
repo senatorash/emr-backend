@@ -9,6 +9,10 @@ export const generateToken = (
   return jwt.sign(payLoad, secret, { expiresIn });
 };
 
-export const verifyToken = <T>(token: string, secret: Secret): T => {
-  return jwt.verify(token, secret) as T;
+export const verifyToken = <T>(token: string, secret: Secret): T | null => {
+  try {
+    return jwt.verify(token, secret) as T;
+  } catch {
+    return null;
+  }
 };

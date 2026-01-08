@@ -44,3 +44,12 @@ export interface Iuser extends mongoose.Document {
   email: string;
   password: string;
 }
+
+export interface Isession extends mongoose.Document {
+  user?: mongoose.Types.ObjectId;
+  token: string;
+  deviceInfo?: string;
+  ipAddress?: string;
+  lastUsedAt?: Date;
+  expiresAt?: Date;
+}

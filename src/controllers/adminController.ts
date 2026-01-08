@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import User from "../models/userModel";
 import envVariables from "../config/index";
+// import { userPayload } from "../interfaces/userPayload";
 
 const { SUPER_ADMIN_PASS, SUPER_ADMIN_EMAIL } = envVariables;
 
