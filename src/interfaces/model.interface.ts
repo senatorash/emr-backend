@@ -53,3 +53,13 @@ export interface Isession extends mongoose.Document {
   lastUsedAt?: Date;
   expiresAt?: Date;
 }
+
+export interface Iappointment extends mongoose.Document {
+  appointmentId: string;
+  patientId: mongoose.Types.ObjectId;
+  doctorId: mongoose.Types.ObjectId;
+  scheduledAt: Date;
+  duration: Number;
+  status: "scheduled" | "completed" | "canceled" | "no-show";
+  reason?: string;
+}

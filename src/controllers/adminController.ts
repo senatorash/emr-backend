@@ -51,12 +51,6 @@ export const createStaffAccount = async (req: Request, res: Response) => {
   try {
     const { role, fullName, email, password } = req.body;
 
-    if (req.user?.role !== "super_admin") {
-      return res.status(403).json({
-        Message: "Only super administrators can create staff accounts",
-      });
-    }
-
     if (!["nurse", "doctor"].includes(role)) {
       return res.status(400).json({
         message: "Invalid role. Only nurse or doctor accounts can be created",
@@ -80,7 +74,6 @@ export const createStaffAccount = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       message: `${role}-${fullName} account created successfully`,
-      data: newStaff,
     });
   } catch (error) {
     console.error("Error creating staff account:", error);

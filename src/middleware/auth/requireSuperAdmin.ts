@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 export const authorizeSuperAdmin = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (req.user?.role !== "super_admin") {
     return res

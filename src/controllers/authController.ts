@@ -9,16 +9,14 @@ import { userPayload } from "../interfaces/userPayload";
 const { ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN, JWT_SECRET } =
   envVariables;
 
-export const loginAdmins = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     // verify if user with email exist in the database
-    const userExists = await User.findOne({
-      email,
-      role: { $in: ["super_admin", "nurse", "doctor"] },
-    });
+    const userExists = await User.findOne({ email });
+
     if (!userExists) {
-      return res.status(404).json({ message: "Super admin not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // compare the password with the hashed password stored in the database
@@ -42,7 +40,7 @@ export const loginAdmins = async (req: Request, res: Response) => {
       deviceInfo: req.headers["user-agent"],
       ipAddress: req.ip,
       expiresAt: new Date(
-        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000
+        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000,
       ),
     });
 
@@ -50,13 +48,13 @@ export const loginAdmins = async (req: Request, res: Response) => {
     const accessToken = generateToken(
       adminPayload,
       `${ACCESS_TOKEN_EXPIRES_IN}m`,
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     const refreshToken = generateToken(
       { ...adminPayload, sessionId: session._id.toString() },
       `${REFRESH_TOKEN_EXPIRES_IN}h`,
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     // hash the refresh token before storing it in the database
@@ -68,7 +66,7 @@ export const loginAdmins = async (req: Request, res: Response) => {
 
     const cookieOptions: CookieOptions = {
       expires: new Date(
-        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000
+        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000,
       ),
       httpOnly: true,
       sameSite: "lax",
@@ -80,6 +78,7 @@ export const loginAdmins = async (req: Request, res: Response) => {
       accessToken,
     });
   } catch (error) {
+    console.error("Error during login:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -102,40 +101,26 @@ export const refreshToken = async (req: Request, res: Response) => {
         message: "Session not found for the provided refresh token",
       });
     }
-    // check if the provided refresh token matches any stored session
-    // let validSession = null;
-    // for (const session of sessions) {
-    //   const isMatch = await bcrypt.compare(refreshToken, session.token);
-    //   if (isMatch) {
-    //     validSession = session;
-    //     break;
-    //   }
-    // }
-    // // If no matching session is found, return an error
-    // if (!validSession) {
-    //   return res.status(403).json({
-    //     message: "Refresh token does not match any active session",
-    //   });
-    // }
 
-    const adminPayload = {
+    const newPayload = {
       userId: payload.userId.toString(),
       role: payload.role,
       fullName: payload.fullName,
       email: payload.email,
+      sessionId: session._id.toString(),
     };
 
     // rotate tokens
     const newAccessToken = generateToken(
-      adminPayload,
+      newPayload,
       `${ACCESS_TOKEN_EXPIRES_IN}m`,
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     const newRefreshToken = generateToken(
-      adminPayload,
+      newPayload,
       `${REFRESH_TOKEN_EXPIRES_IN}h`,
-      JWT_SECRET
+      JWT_SECRET,
     );
 
     // hash the new refresh token before storing it in the database
@@ -146,11 +131,11 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const cookieOptions: CookieOptions = {
       expires: new Date(
-        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000
+        Date.now() + Number(REFRESH_TOKEN_EXPIRES_IN) * 60 * 60 * 1000,
       ),
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: true,
     };
     return res.cookie("r_t", newRefreshToken, cookieOptions).json({
       message: "Tokens refreshed Successfully",
@@ -188,11 +173,11 @@ export const logoutUser = async (req: Request, res: Response) => {
 };
 
 // Get current login user details
-export const getCurrentAdmin = async (req: Request, res: Response) => {
+export const getCurrentUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.user as userPayload;
     const user = await User.findById(userId).select(
-      "-password -createdAt -updatedAt -__v"
+      "-password -createdAt -updatedAt -__v",
     );
     if (!user) {
       return res.status(404).json({ message: "User not found" });

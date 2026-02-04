@@ -1,14 +1,10 @@
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import adminRouter from "./routes/adminRoutes";
-import authRoutes from "./routes/authRoutes";
-import patientRouter from "./routes/patientRoutes";
-import familyRouter from "./routes/familyRoutes";
-import recordRouter from "./routes/recordRoutes";
+import apiV1Router from "./routes/apiV1";
 
 const app = express();
-// global middleware configuration to receive JSON data from client s
+// global middleware configuration to receive JSON data from client side
 app.use(express.json());
 
 // global middleware to parse cookies
@@ -19,17 +15,13 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Welcome to the EMR system API" });
 });
 
-app.use("/admin", adminRouter);
-app.use("/auth", authRoutes);
-app.use("/patients", patientRouter);
-app.use("/family", familyRouter);
-app.use("/records", recordRouter);
+app.use("/api/v1", apiV1Router);
 
 export default app;

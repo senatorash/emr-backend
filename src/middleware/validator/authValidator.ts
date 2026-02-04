@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { body, validationResult, check } from "express-validator";
+import { body } from "express-validator";
 
-const validateLogin = () => {
+export const validateLogin = () => {
   return [
     body("email")
       .notEmpty()
@@ -11,6 +10,10 @@ const validateLogin = () => {
       .normalizeEmail()
       .escape(),
 
-    body("password").notEmpty().withMessage("Password is required").trim(),
+    body("password")
+      .notEmpty()
+      .withMessage("Password is required")
+      .trim()
+      .escape(),
   ];
 };

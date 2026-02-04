@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Patient from "../models/patientModel";
 import { getPagination } from "../helpers/paginationHelper";
 
+// create a new patient
 export const createPatient = async (req: Request, res: Response) => {
   try {
     const {
@@ -81,6 +82,7 @@ export const getAllPatients = async (req: Request, res: Response) => {
   }
 };
 
+// get a patient by id
 export const getPatientById = async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;
@@ -100,6 +102,7 @@ export const getPatientById = async (req: Request, res: Response) => {
   }
 };
 
+// update a patient by id
 export const updatePatient = async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;
@@ -120,6 +123,7 @@ export const updatePatient = async (req: Request, res: Response) => {
   }
 };
 
+// delete patient from the database
 export const deletePatient = async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;

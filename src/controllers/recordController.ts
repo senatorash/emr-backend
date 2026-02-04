@@ -48,7 +48,7 @@ export const createRecord = async (req: Request, res: Response) => {
       complaints,
       diagnosis,
       treatment,
-      CreatedBy: `${req.user?.role} - ${req.user?.fullName}`,
+      CreatedBy: req.user.userId,
     });
     await record.save();
 
