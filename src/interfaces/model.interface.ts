@@ -11,16 +11,19 @@ export interface Ifamily extends mongoose.Document {
 
 export interface Ipatient extends mongoose.Document {
   patientId?: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   dob: Date;
   gender: string;
   phone: string;
+  email?: string;
   address: string;
   emergencyContact: string;
   nextOfKin: string;
   bloodGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   nin: string;
   familyMembers: mongoose.Types.ObjectId[];
+  createdBy: mongoose.Types.ObjectId;
 }
 
 export interface Irecord extends mongoose.Document {
@@ -34,7 +37,7 @@ export interface Irecord extends mongoose.Document {
   complaints?: string;
   diagnosis?: string;
   treatment?: string;
-  CreatedBy?: string;
+  CreatedBy: mongoose.Types.ObjectId;
   date: Date;
 }
 

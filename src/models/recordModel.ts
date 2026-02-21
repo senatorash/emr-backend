@@ -31,14 +31,15 @@ const recordSchema = new Schema<Irecord>(
       type: String,
     },
     CreatedBy: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
     date: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Record = mongoose.model<Irecord>("Record", recordSchema);

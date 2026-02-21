@@ -12,11 +12,11 @@ export const createRecord = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!["nurse", "doctor", "super_admin"].includes(req.user.role)) {
-      return res.status(403).json({
-        message: "Only nurses and doctors can create medical records",
-      });
-    }
+    // if (!["nurse", "doctor", "super_admin"].includes(req.user?.role)) {
+    //   return res.status(403).json({
+    //     message: "Only nurses and doctors can create medical records",
+    //   });
+    // }
 
     // confirm patient exists
     const patient = await Patient.findOne({ patientId });

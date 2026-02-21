@@ -8,7 +8,7 @@ const { JWT_SECRET } = envVariables;
 export const requireSignin = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization;
@@ -25,12 +25,14 @@ export const requireSignin = (
 
     const decodedUser = verifyToken(token, JWT_SECRET) as userPayload;
     if (!decodedUser) {
+      console.error("Token verification failed");
       return res.status(403).json({ message: "Invalid token" });
     }
 
     req.user = decodedUser;
     next();
   } catch (error) {
+    console.error("Error in requireSignin middleware:", error);
     res.status(403).json({ message: "Invalid token" });
   }
 };

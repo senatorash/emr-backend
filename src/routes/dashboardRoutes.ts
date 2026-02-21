@@ -1,9 +1,19 @@
 import { Router } from "express";
-import { getDashboardStats } from "../controllers/dashboardController";
+import {
+  getDashboard,
+  getStaffStats,
+} from "../controllers/dashboardController";
 import { requireSignin } from "../middleware/auth/requireSignin";
+import { authorizeSuperAdmin } from "../middleware/auth/requireSuperAdmin";
 
 const dashboardRouter = Router();
 
-dashboardRouter.get("/stats", requireSignin, getDashboardStats);
+dashboardRouter.get("/stats", requireSignin, getDashboard);
+dashboardRouter.get(
+  "/staff-stats",
+  requireSignin,
+  authorizeSuperAdmin,
+  getStaffStats,
+);
 
 export default dashboardRouter;

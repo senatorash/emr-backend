@@ -1,79 +1,30 @@
 import { Request, Response } from "express";
-import User from "../models/userModel";
-import Patient from "../models/patientModel";
-import Record from "../models/recordModel";
-import Appointment from "../models/appointmentModel";
+import { getDashboardStats } from "../services/dashboardService";
+import { getStaff } from "../services/dashboardService";
 
-export const getDashboardStats = async (req: Request, res: Response) => {
+export const getDashboard = async (req: Request, res: Response) => {
   try {
     const role = req.user?.role;
     const userId = req.user?.userId;
 
-    // Super Admin
-    if (role === "super_admin") {
-      const [staff, patients, records] = await Promise.all([
-        User.countDocuments({ role: { $in: ["doctor", "nurse"] } }),
-        Patient.countDocuments(),
-        Record.countDocuments(),
-      ]);
-
-      return res.status(200).json({
-        role,
-        stats: {
-          totalStaff: staff,
-          totalPatients: patients,
-          totalRecords: records,
-          systemUptime: "99.9%",
-        },
-      });
+    const stats = await getDashboardStats(userId!, role!);
+    if (!stats) {
+      return res.status(404).json({ message: "No stats found for this user" });
     }
+    return res.status(200).json({ success: true, role, data: stats });
+  } catch (error) {
+    console.log("Error fetching dashboard stats:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-    // doctor
-
-    if (role === "doctor") {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-      const [appointments, patients, records, todaysAppointments] =
-        await Promise.all([
-          Appointment.countDocuments({ doctorId: userId }),
-          Patient.countDocuments(),
-          Record.countDocuments({ createdBy: userId }),
-          Appointment.countDocuments({
-            doctorId: userId,
-            scheduledAt: {
-              $gte: startOfDay,
-              $lt: endOfDay,
-            },
-          }),
-        ]);
-
-      return res.status(200).json({
-        role,
-        stats: {
-          totalAppointments: appointments,
-          totalPatients: patients,
-          totalRecords: records,
-          todaysAppointments: todaysAppointments,
-        },
-      });
+export const getStaffStats = async (req: Request, res: Response) => {
+  try {
+    const stats = await getStaff();
+    if (!stats) {
+      return res.status(404).json({ message: "No staff stats found" });
     }
-
-    // nurse
-    if (role === "nurse") {
-      const [patients, records] = await Promise.all([
-        Patient.countDocuments(),
-        Record.countDocuments(),
-      ]);
-      return res.status(200).json({
-        role,
-        stats: {
-          totalPatients: patients,
-          totalRecords: records,
-        },
-      });
-    }
+    return res.status(200).json({ success: true, data: stats });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
   }

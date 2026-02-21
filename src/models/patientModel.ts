@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Ipatient } from "../interfaces/model.interface";
+import { Counter } from "./counterModel";
 
 const Schema = mongoose.Schema;
 
@@ -11,9 +12,15 @@ const patientSchema = new Schema<Ipatient>(
       unique: true,
       index: true,
     },
-    fullName: {
+    firstName: {
       type: String,
       required: true,
+      index: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      index: true,
     },
     dob: {
       type: Date,
@@ -26,6 +33,10 @@ const patientSchema = new Schema<Ipatient>(
     phone: {
       type: String,
       required: true,
+    },
+    email: {
+      type: String,
+      index: true,
     },
     nin: {
       type: String,
@@ -45,8 +56,7 @@ const patientSchema = new Schema<Ipatient>(
     },
     bloodGroup: {
       type: String,
-      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-      required: true,
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
     },
     familyMembers: [
       {
@@ -54,18 +64,13 @@ const patientSchema = new Schema<Ipatient>(
         ref: "FamilyMember",
       },
     ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
-// Auto generate parentId before saving a patient
-patientSchema.pre("save", async function () {
-  if (this.patientId) return;
-  const year = new Date().getFullYear();
-  const count = await mongoose.model<Ipatient>("Patient").countDocuments();
-  const serial = String(count + 1).padStart(4, "0");
-  this.patientId = `EMR-${year}-${serial}`;
-});
 
 const Patient = mongoose.model<Ipatient>("Patient", patientSchema);
 export default Patient;

@@ -1,15 +1,18 @@
 import { Request, Response } from "express";
 import Patient from "../models/patientModel";
 import { getPagination } from "../helpers/paginationHelper";
+import { generateId } from "../helpers/idGenerator";
 
 // create a new patient
 export const createPatient = async (req: Request, res: Response) => {
   try {
     const {
-      fullName,
+      firstName,
+      lastName,
       dob,
       gender,
       phone,
+      email,
       nin,
       address,
       emergencyContact,
@@ -28,30 +31,40 @@ export const createPatient = async (req: Request, res: Response) => {
       });
     }
 
-    const patientExists = await Patient.findOne({ phone });
+    const patientExists = await Patient.findOne({
+      $or: [{ email }, { phone }],
+    });
 
     if (patientExists) {
-      return res
-        .status(409)
-        .json({ message: "Patient with this phone number already exists" });
+      if (patientExists.email === email) {
+        return res.status(409).json({ message: "Email already in use" });
+      }
+      if (patientExists.phone === phone) {
+        return res.status(409).json({ message: "Phone number already in use" });
+      }
     }
 
+    const patientId = await generateId("PAT");
+
     const newPatient = new Patient({
-      fullName,
+      firstName,
+      lastName,
       dob,
       gender,
       phone,
+      email,
       nin,
       address,
       emergencyContact,
       nextOfKin,
       bloodGroup,
+      patientId,
+      createdBy: req.user.userId,
     });
     await newPatient.save();
 
     return res.status(201).json({
       message: "Patient account created successfully",
-      data: newPatient,
     });
   } catch (error) {
     console.log(error);
@@ -64,8 +77,31 @@ export const getAllPatients = async (req: Request, res: Response) => {
   try {
     const { skip, limit } = getPagination(req.query);
     const page = req.query.page ? Number(req.query.page) : 1;
-    const patients = await Patient.find().skip(skip).limit(limit);
-    const total = await Patient.countDocuments();
+    const searchParam = req.query.search as string;
+
+    const search =
+      typeof searchParam === "string"
+        ? searchParam
+        : Array.isArray(searchParam)
+          ? searchParam[0]
+          : "";
+
+    // if search query is provided, filter patients by first name, last name or email
+    const query = search
+      ? {
+          $or: [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { patientId: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const [patients, total] = await Promise.all([
+      Patient.find(query).skip(skip).limit(limit),
+      Patient.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       message: "Patients retrieved successfully",
@@ -78,6 +114,7 @@ export const getAllPatients = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
