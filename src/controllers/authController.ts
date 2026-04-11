@@ -4,7 +4,7 @@ import User from "../models/userModel";
 import Session from "../models/sessionModel";
 import { generateToken, verifyToken } from "../helpers/jwtHelpers";
 import envVariables from "../config/index";
-import { userPayload } from "../interfaces/userPayload";
+import { userPayload } from "../types/userPayload";
 
 const { ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN, JWT_SECRET } =
   envVariables;
@@ -27,11 +27,13 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     // create user payload for token generation
-    const adminPayload = {
+    const adminPayload: userPayload = {
       userId: userExists._id.toString(),
       role: userExists.role,
-      fullName: userExists.fullName,
+      firstName: userExists.firstName,
+      lastName: userExists.lastName,
       email: userExists.email,
+      hospital: userExists.hospital ? userExists.hospital._id.toString() : null,
     };
 
     // store the refresh token in the database with user agent and ip address
@@ -70,11 +72,11 @@ export const loginUser = async (req: Request, res: Response) => {
       ),
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: true,
     };
 
     return res.cookie("r_t", refreshToken, cookieOptions).json({
-      message: `Successfully logged in from ${userExists.role}-${userExists.fullName} account`,
+      message: `Successfully logged in from ${userExists.role}-${userExists.firstName} account`,
       accessToken,
     });
   } catch (error) {
@@ -105,8 +107,10 @@ export const refreshToken = async (req: Request, res: Response) => {
     const newPayload = {
       userId: payload.userId.toString(),
       role: payload.role,
-      fullName: payload.fullName,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       email: payload.email,
+      hospital: payload.hospital,
       sessionId: session._id.toString(),
     };
 
@@ -176,18 +180,20 @@ export const logoutUser = async (req: Request, res: Response) => {
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.user as userPayload;
-    const user = await User.findById(userId).select(
-      "-password -createdAt -updatedAt -__v",
-    );
+    const user = await User.findById(userId)
+      .populate("hospital", "name")
+      .select("-password -createdAt -updatedAt -__v");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const userExists = {
       userId: user._id,
-      fullName: user.fullName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
+      hospital: user.hospital,
     };
 
     return res

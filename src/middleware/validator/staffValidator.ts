@@ -2,9 +2,14 @@ import { body } from "express-validator";
 
 export const validateSignup = () => {
   return [
-    body("fullName")
+    body("firstName")
       .notEmpty()
-      .withMessage("Full Name is required")
+      .withMessage("First Name is required")
+      .trim()
+      .escape(),
+    body("lastName")
+      .notEmpty()
+      .withMessage("Last Name is required")
       .trim()
       .escape(),
     // role

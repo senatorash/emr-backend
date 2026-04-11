@@ -7,6 +7,7 @@ import recordRouter from "./recordRoutes";
 import appointmentRouter from "./appointmentRoutes";
 import dashboardRouter from "./dashboardRoutes";
 import staffRouter from "./staffRoutes";
+import hospitalRouter from "./hospitalRoutes";
 
 const apiV1Router = express.Router();
 
@@ -18,4 +19,5 @@ apiV1Router.use("/records", recordRouter);
 apiV1Router.use("/appointments", appointmentRouter);
 apiV1Router.use("/dashboard", dashboardRouter);
 apiV1Router.use("/staff", staffRouter);
+apiV1Router.use("/hospital", hospitalRouter);
 export default apiV1Router;

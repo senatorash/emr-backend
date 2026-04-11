@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
-import { Iappointment } from "../interfaces/model.interface";
+import { Iappointment } from "../types/model.interface";
 
 const Schema = mongoose.Schema;
 
 const appointmentSchema = new Schema<Iappointment>(
   {
     appointmentId: { type: String },
-    patientId: { type: mongoose.Types.ObjectId, ref: "Patient" },
-    doctorId: { type: mongoose.Types.ObjectId, ref: "User" },
+    patient: { type: Schema.Types.ObjectId, ref: "Patient" },
+    doctor: { type: Schema.Types.ObjectId, ref: "User" },
+    hospital: { type: Schema.Types.ObjectId, ref: "Hospital" },
     scheduledAt: { type: Date, required: true },
     duration: { type: Number, required: true },
     status: {

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { Ipatient } from "../interfaces/model.interface";
-import { Counter } from "./counterModel";
+import { Ipatient } from "../types/model.interface";
 
 const Schema = mongoose.Schema;
 
@@ -9,9 +8,8 @@ const patientSchema = new Schema<Ipatient>(
     // patient fields
     patientId: {
       type: String,
-      unique: true,
-      index: true,
     },
+    hospital: { type: Schema.Types.ObjectId, ref: "Hospital", required: true },
     firstName: {
       type: String,
       required: true,
@@ -58,19 +56,32 @@ const patientSchema = new Schema<Ipatient>(
       type: String,
       enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
     },
-    familyMembers: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "FamilyMember",
-      },
-    ],
+
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive", "discharged", "deceased"],
+      default: "active",
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    id: false,
+  },
 );
+
+patientSchema.virtual("familyMembers", {
+  ref: "FamilyMember",
+  localField: "_id",
+  foreignField: "patient",
+});
+
+patientSchema.index({ patientId: 1, hospital: 1 }, { unique: true });
 
 const Patient = mongoose.model<Ipatient>("Patient", patientSchema);
 export default Patient;

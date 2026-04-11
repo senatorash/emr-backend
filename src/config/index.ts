@@ -1,5 +1,5 @@
 import dotenv = require("dotenv");
-import { EnvVariables } from "../interfaces/env.interface";
+import { EnvVariables } from "../types/env.interface";
 
 dotenv.config();
 
@@ -11,6 +11,13 @@ const envVariables: EnvVariables = {
   ACCESS_TOKEN_EXPIRES_IN: Number(process.env.ACCESS_TOKEN_EXPIRES_IN),
   REFRESH_TOKEN_EXPIRES_IN: Number(process.env.REFRESH_TOKEN_EXPIRES_IN),
   JWT_SECRET: process.env.JWT_SECRET || "",
+  CLOUD_NAME: process.env.CLOUD_NAME || "",
+  CLOUD_API_KEY: process.env.CLOUD_API_KEY || "",
+  CLOUDINARYAPI_SECRET: process.env.CLOUDINARYAPI_SECRET || "",
+  AWS_REGION: process.env.AWS_REGION || "",
+  AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME || "",
+  AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY || "",
+  AWS_SECRET_KEY: process.env.AWS_SECRET_KEY || "",
 };
 
 export = envVariables;

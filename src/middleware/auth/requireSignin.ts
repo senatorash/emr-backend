@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../../helpers/jwtHelpers";
 import envVariables from "../../config/index";
-import { userPayload } from "../../interfaces/userPayload";
+import { userPayload } from "../../types/userPayload";
 
 const { JWT_SECRET } = envVariables;
 

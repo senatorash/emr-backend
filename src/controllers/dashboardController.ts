@@ -6,21 +6,24 @@ export const getDashboard = async (req: Request, res: Response) => {
   try {
     const role = req.user?.role;
     const userId = req.user?.userId;
+    const hospitalFilter = req.hospitalFilter;
 
-    const stats = await getDashboardStats(userId!, role!);
+    const stats = await getDashboardStats(userId!, role!, hospitalFilter);
     if (!stats) {
       return res.status(404).json({ message: "No stats found for this user" });
     }
     return res.status(200).json({ success: true, role, data: stats });
   } catch (error) {
-    console.log("Error fetching dashboard stats:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 export const getStaffStats = async (req: Request, res: Response) => {
   try {
-    const stats = await getStaff();
+    const role = req.user?.role;
+    const hospitalFilter = req.hospitalFilter;
+
+    const stats = await getStaff(role!, hospitalFilter!);
     if (!stats) {
       return res.status(404).json({ message: "No staff stats found" });
     }

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { Isession } from "../interfaces/model.interface";
+import { Isession } from "../types/model.interface";
 
 const Schema = mongoose.Schema;
 
@@ -29,7 +29,7 @@ const sessionSchema = new Schema<Isession>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Auto cleanup expired sessions

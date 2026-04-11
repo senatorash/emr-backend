@@ -20,11 +20,13 @@ export const createPatient = async (req: Request, res: Response) => {
       bloodGroup,
     } = req.body;
 
+    const hospitalFilter = req.hospitalFilter;
+
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!["nurse", "doctor", "super_admin"].includes(req.user.role)) {
+    if (!["nurse", "doctor", "admin"].includes(req.user.role)) {
       return res.status(403).json({
         message:
           "Only nurses,doctors and super admins can create patient accounts",
@@ -33,6 +35,7 @@ export const createPatient = async (req: Request, res: Response) => {
 
     const patientExists = await Patient.findOne({
       $or: [{ email }, { phone }],
+      ...hospitalFilter,
     });
 
     if (patientExists) {
@@ -44,7 +47,7 @@ export const createPatient = async (req: Request, res: Response) => {
       }
     }
 
-    const patientId = await generateId("PAT");
+    const patientId = await generateId("PAT", req.user.hospital!);
 
     const newPatient = new Patient({
       firstName,
@@ -59,12 +62,14 @@ export const createPatient = async (req: Request, res: Response) => {
       nextOfKin,
       bloodGroup,
       patientId,
+      hospital: req.user.hospital,
       createdBy: req.user.userId,
     });
     await newPatient.save();
 
     return res.status(201).json({
       message: "Patient account created successfully",
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -78,6 +83,8 @@ export const getAllPatients = async (req: Request, res: Response) => {
     const { skip, limit } = getPagination(req.query);
     const page = req.query.page ? Number(req.query.page) : 1;
     const searchParam = req.query.search as string;
+
+    const hospitalFilter = req.hospitalFilter;
 
     const search =
       typeof searchParam === "string"
@@ -94,12 +101,21 @@ export const getAllPatients = async (req: Request, res: Response) => {
             { lastName: { $regex: search, $options: "i" } },
             { email: { $regex: search, $options: "i" } },
             { patientId: { $regex: search, $options: "i" } },
+            { status: { $regex: search, $options: "i" } },
           ],
+          ...hospitalFilter,
         }
-      : {};
+      : { ...hospitalFilter };
 
     const [patients, total] = await Promise.all([
-      Patient.find(query).skip(skip).limit(limit),
+      Patient.find(query)
+        .sort({ createdAt: -1 })
+        .populate(
+          "familyMembers",
+          "fullName firstName lastName phoneNumber relationship familyMemberId",
+        )
+        .skip(skip)
+        .limit(limit),
       Patient.countDocuments(query),
     ]);
 
@@ -114,7 +130,6 @@ export const getAllPatients = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -123,9 +138,16 @@ export const getAllPatients = async (req: Request, res: Response) => {
 export const getPatientById = async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;
+    const hospitalFilter = req.hospitalFilter;
 
-    const patientExistsById = await Patient.findOne({ patientId })
-      .populate("familyMembers")
+    const patientExistsById = await Patient.findOne({
+      patientId,
+      ...hospitalFilter,
+    })
+      .populate(
+        "familyMembers",
+        "fullName phoneNumber relationship familyMemberId",
+      )
       .select("-password");
     if (!patientExistsById) {
       return res.status(404).json({ message: "Patient not found" });

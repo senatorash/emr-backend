@@ -44,8 +44,8 @@ export const createAppointment = async (req: Request, res: Response) => {
         .json({ message: "Doctor is not available at the selected time" });
     }
     const appointment = await Appointment.create({
-      patientId: patientExist._id,
-      doctorId,
+      patient: patientExist._id,
+      doctor: doctorId,
       scheduledAt: scheduledDate,
       duration,
     });
@@ -61,10 +61,10 @@ export const getAppointmentsByPatient = async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;
 
-    const appointmentExist = await Appointment.find({ patientId })
-      .populate("patientId", "patientId fullName phone")
+    const appointmentExist = await Appointment.find({ patient: patientId })
+      .populate("patient", "patientId fullName phone")
       .sort({ scheduledAt: -1 })
-      .select("-doctorId");
+      .select("-doctor");
     if (!appointmentExist) {
       return res
         .status(404)
@@ -79,8 +79,8 @@ export const getAppointmentsByPatient = async (req: Request, res: Response) => {
 export const getAppointmentByDoctor = async (req: Request, res: Response) => {
   try {
     const { doctorId } = req.params;
-    const appointmentExist = await Appointment.find({ doctorId })
-      .populate("doctorId patientId", "patientId fullName email")
+    const appointmentExist = await Appointment.find({ doctor: doctorId })
+      .populate("doctor patient", "patientId fullName email")
       .sort({
         scheduledAt: -1,
       });
@@ -117,7 +117,7 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     const appointmentExist = await Appointment.find({
       scheduledAt: { $gte: utcStart, $lte: utcEnd },
     })
-      .populate("patientId doctorId", "patientId fullName email")
+      .populate("patient doctor", "patientId fullName email")
       .sort({ scheduledAt: 1 });
 
     if (!appointmentExist) {
@@ -140,7 +140,7 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
     const available = await isDoctorAvailable(
-      appointment.doctorId.toString(),
+      appointment.doctor.toString(),
       new Date(scheduledAt),
       duration ?? appointment.duration,
     );

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Ifamily } from "../interfaces/model.interface";
+import { Ifamily } from "../types/model.interface";
 
 const Schema = mongoose.Schema;
 
@@ -11,9 +11,15 @@ const familySchema = new Schema<Ifamily>(
       required: true,
     },
 
+    patient: {
+      type: Schema.Types.ObjectId,
+      ref: "Patient",
+      required: true,
+    },
+
     familyMemberId: {
       type: String,
-      unique: true,
+      required: true,
     },
 
     phoneNumber: {
@@ -21,7 +27,11 @@ const familySchema = new Schema<Ifamily>(
       required: true,
     },
 
-    fullName: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -36,6 +46,7 @@ const familySchema = new Schema<Ifamily>(
     gender: {
       type: String,
     },
+    hospital: { type: Schema.Types.ObjectId, ref: "Hospital", required: true },
   },
   { timestamps: true },
 );

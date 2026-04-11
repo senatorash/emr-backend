@@ -7,19 +7,30 @@ import {
   deletePatient,
 } from "../controllers/patientController";
 import { requireSignin } from "../middleware/auth/requireSignin";
-import { authorizeSuperAdmin } from "../middleware/auth/requireSuperAdmin";
+import { authorizeAdmin } from "../middleware/auth/requireAdmin";
+import { hospitalFiltering } from "../middleware/tenant";
 
 const patientRouter = express.Router();
 
 patientRouter.post("/create", requireSignin, createPatient);
-patientRouter.get("/all", requireSignin, getAllPatients);
-patientRouter.get("/:patientId", requireSignin, getPatientById);
-patientRouter.put("/:patientId/update", requireSignin, updatePatient);
+patientRouter.get("/all", requireSignin, hospitalFiltering, getAllPatients);
+patientRouter.get(
+  "/:patientId",
+  requireSignin,
+  hospitalFiltering,
+  getPatientById,
+);
+patientRouter.put(
+  "/:patientId/update",
+  requireSignin,
+  hospitalFiltering,
+  updatePatient,
+);
 patientRouter.delete(
   "/:patientId/delete",
   requireSignin,
-  authorizeSuperAdmin,
-  deletePatient
+  authorizeAdmin,
+  deletePatient,
 );
 
 export default patientRouter;

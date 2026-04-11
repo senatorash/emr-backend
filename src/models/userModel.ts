@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Iuser } from "../interfaces/model.interface";
+import { Iuser } from "../types/model.interface";
 
 const Schema = mongoose.Schema;
 
@@ -8,22 +8,29 @@ const userSchema = new Schema<Iuser>(
   {
     role: {
       type: String,
-      enum: ["super_admin", "nurse", "doctor"],
+      enum: ["super_admin", "admin", "nurse", "doctor"],
       required: true,
     },
-    fullName: {
+    hospital: { type: Schema.Types.ObjectId, ref: "Hospital" },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
     email: {
       type: String,
+      unique: true,
       required: true,
     },
     password: {
       type: String,
+      required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 const User = mongoose.model<Iuser>("User", userSchema);
 export default User;
