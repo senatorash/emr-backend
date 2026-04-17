@@ -13,9 +13,10 @@ const recordSchema = new Schema<Irecord>(
       index: true,
     },
     personId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       index: true,
+      refPath: "personModel",
     },
     vitals: {
       bloodPressure: { type: String },
@@ -52,13 +53,13 @@ const recordSchema = new Schema<Irecord>(
     diagnosis: {
       type: String,
     },
-    CreatedBy: {
+    createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
     personModel: {
       type: String,
-      enum: ["patient", "family"],
+      enum: ["Patient", "FamilyMember"],
       required: true,
     },
     date: {

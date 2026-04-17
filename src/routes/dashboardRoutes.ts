@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getDashboard,
   getStaffStats,
+  recordStats,
 } from "../controllers/dashboardController";
 import { requireSignin } from "../middleware/auth/requireSignin";
 import { authorizeAdmin } from "../middleware/auth/requireAdmin";
@@ -16,6 +17,13 @@ dashboardRouter.get(
   authorizeAdmin,
   hospitalFiltering,
   getStaffStats,
+);
+dashboardRouter.get(
+  "/record-stats",
+  requireSignin,
+  authorizeAdmin,
+  hospitalFiltering,
+  recordStats,
 );
 
 export default dashboardRouter;

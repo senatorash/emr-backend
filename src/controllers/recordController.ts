@@ -3,7 +3,7 @@ import Patient from "../models/patientModel";
 import FamilyMember from "../models/familyModel";
 import Record from "../models/recordModel";
 import { uploadAttachment } from "../services/uploadService";
-import { Attachments } from "../types/model.interface";
+import { Attachments, AttachmentMeta } from "../types/record.interface";
 import { getPagination } from "../helpers/paginationHelper";
 
 export const createRecord = async (req: Request, res: Response) => {
@@ -21,14 +21,14 @@ export const createRecord = async (req: Request, res: Response) => {
     // confirm patient exists
     let person;
 
-    if (personModel === "patient") {
+    if (personModel === "Patient") {
       person = await Patient.findOne({
-        patientId,
+        patientId: personId,
         hospital: req.hospitalFilter.hospital,
       });
     }
 
-    if (personModel === "family") {
+    if (personModel === "FamilyMember") {
       person = await FamilyMember.findOne({
         familyMemberId: personId,
         hospital: req.hospitalFilter.hospital,
@@ -36,32 +36,53 @@ export const createRecord = async (req: Request, res: Response) => {
     }
 
     if (!person) {
-      return res.status(404).json({ message: "Person with this ID not found" });
+      return res
+        .status(404)
+        .json({
+          message:
+            "Person with this ID not found. Please check the ID and the associated person model.",
+        });
     }
 
     let attachments: Attachments[] = [];
-    if (req.files && Array.isArray(req.files)) {
-      const metadata = JSON.parse(req.body.metadata || "[]");
 
-      const uploadedFiles = (req.files as Express.Multer.File[]).map(
-        (file, index) =>
-          uploadAttachment(file, req.user!.userId, {
-            category: metadata[index]?.category,
-            notes: metadata[index]?.notes,
-          }),
+    if (req.files && Array.isArray(req.files)) {
+      let metadata: AttachmentMeta[] = [];
+      try {
+        metadata = JSON.parse(req.body.metadata || "[]");
+      } catch (error) {
+        metadata = [];
+      }
+
+      const files = req.files as Express.Multer.File[];
+
+      const invalidIndex = files.findIndex(
+        (_, index) => !metadata[index]?.category,
       );
-      attachments = await Promise.all(uploadedFiles);
+
+      if (invalidIndex !== -1) {
+        return res.status(400).json({
+          message: `Missing category in metadata for file at index ${invalidIndex}: "${files[invalidIndex].originalname}"`,
+        });
+      }
+
+      attachments = await Promise.all(
+        files.map((file, index) => {
+          const { category, notes } = metadata[index];
+          return uploadAttachment(file, req.user!.userId, { category, notes });
+        }),
+      );
     }
 
     await Record.create({
       patientId,
-      personId,
+      personId: person._id,
       personModel,
       vitals,
       complaints,
       diagnosis,
       treatments,
-      CreatedBy: req.user?.userId,
+      createdBy: req.user?.userId,
       hospital: req.hospitalFilter.hospital,
       attachments,
     });
@@ -108,7 +129,8 @@ export const getRecords = async (req: Request, res: Response) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate("CreatedBy", "firstName lastName email"),
+        .populate("createdBy", "firstName lastName email")
+        .populate("personId", "firstName lastName"),
       Record.countDocuments(query),
     ]);
 

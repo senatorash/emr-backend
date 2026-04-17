@@ -304,3 +304,34 @@ export const getStaff = async (role: string, hospitalFilter: {}) => {
     };
   } catch (error) {}
 };
+
+export const getRecordStats = async (hospitalFilter: {}) => {
+  try {
+    const [totalRecord, recordsWithVital] = await Promise.all([
+      Record.countDocuments({ ...hospitalFilter }),
+      Record.countDocuments({
+        $or: [
+          { "vitals.bloodPressure": { $nin: [null, ""] } },
+          { "vitals.pulse": { $nin: [null, ""] } },
+          { "vitals.temperature": { $nin: [null, ""] } },
+          { "vitals.weight": { $nin: [null, ""] } },
+          { "vitals.height": { $nin: [null, ""] } },
+          { "vitals.oxygen": { $nin: [null, ""] } },
+        ],
+        ...hospitalFilter,
+      }),
+    ]);
+    return {
+      stats: [
+        {
+          title: "Total Records",
+          value: totalRecord,
+        },
+        {
+          title: "Records with Vitals",
+          value: recordsWithVital,
+        },
+      ],
+    };
+  } catch (error) {}
+};

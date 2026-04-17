@@ -43,7 +43,7 @@ export interface Attachments {
 
 export interface Irecord extends mongoose.Document {
   patientId: string;
-  personId: string;
+  personId: mongoose.Types.ObjectId;
   personModel: "Patient" | "FamilyMember";
   vitals: {
     bloodPressure?: string;
@@ -65,7 +65,7 @@ export interface Irecord extends mongoose.Document {
   complaints?: string;
   diagnosis?: string;
   treatments?: string;
-  CreatedBy: mongoose.Types.ObjectId;
+  createdBy: mongoose.Types.ObjectId;
   hospital: mongoose.Types.ObjectId;
   date: Date;
   attachments?: Attachments[];

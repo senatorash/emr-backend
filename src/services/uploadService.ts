@@ -8,7 +8,7 @@ export const uploadAttachment = async (
   userId: string,
   meta: {
     category: string;
-    notes: string;
+    notes?: string;
   },
 ) => {
   await validateFile(file);

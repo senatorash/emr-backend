@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import User from "../models/userModel";
 import envVariables from "../config/index";
 import { getPagination } from "../helpers/paginationHelper";
+import { toTitleCase } from "../helpers/titleCase";
 
 const { SUPER_ADMIN_PASS, SUPER_ADMIN_EMAIL } = envVariables;
 
@@ -69,7 +70,7 @@ export const createStaffAccount = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newStaff = await User.create({
+    const newStaff = new User({
       role,
       firstName,
       lastName,
@@ -77,6 +78,8 @@ export const createStaffAccount = async (req: Request, res: Response) => {
       password: hashedPassword,
       hospital: hospitalId,
     });
+    newStaff.lastName = toTitleCase(newStaff.lastName);
+    newStaff.firstName = toTitleCase(newStaff.firstName);
     await newStaff.save();
 
     return res.status(201).json({

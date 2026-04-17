@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Patient from "../models/patientModel";
 import { getPagination } from "../helpers/paginationHelper";
 import { generateId } from "../helpers/idGenerator";
+import { toTitleCase } from "../helpers/titleCase";
 
 // create a new patient
 export const createPatient = async (req: Request, res: Response) => {
@@ -65,6 +66,8 @@ export const createPatient = async (req: Request, res: Response) => {
       hospital: req.user.hospital,
       createdBy: req.user.userId,
     });
+    newPatient.lastName = toTitleCase(newPatient.lastName);
+    newPatient.firstName = toTitleCase(newPatient.firstName);
     await newPatient.save();
 
     return res.status(201).json({
