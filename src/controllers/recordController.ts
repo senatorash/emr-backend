@@ -12,11 +12,18 @@ export const createRecord = async (req: Request, res: Response) => {
       patientId,
       personId,
       personModel,
-      vitals,
+      recordType,
       complaints,
       diagnosis,
       treatments,
     } = req.body;
+
+    let vitals = {};
+    try {
+      vitals = JSON.parse(req.body.vitals || "{}");
+    } catch (error) {
+      vitals = {};
+    }
 
     // confirm patient exists
     let person;
@@ -36,12 +43,10 @@ export const createRecord = async (req: Request, res: Response) => {
     }
 
     if (!person) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Person with this ID not found. Please check the ID and the associated person model.",
-        });
+      return res.status(404).json({
+        message:
+          "Person with this ID not found. Please check the ID and the associated person model.",
+      });
     }
 
     let attachments: Attachments[] = [];
@@ -78,6 +83,7 @@ export const createRecord = async (req: Request, res: Response) => {
       patientId,
       personId: person._id,
       personModel,
+      recordType,
       vitals,
       complaints,
       diagnosis,
@@ -89,7 +95,7 @@ export const createRecord = async (req: Request, res: Response) => {
 
     return res
       .status(201)
-      .json({ message: "Medical record created successfully", sucess: true });
+      .json({ message: "Medical record created successfully", success: true });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -111,7 +117,7 @@ export const getRecords = async (req: Request, res: Response) => {
           ? searchParam[0]
           : "";
 
-    // filter records by patients, complaints, diagnosis or treatment
+    // filter records by patients, complaints, diagnosis, treatment or type of record
     const query = search
       ? {
           $or: [
@@ -119,6 +125,8 @@ export const getRecords = async (req: Request, res: Response) => {
             { complaints: { $regex: search, $options: "i" } },
             { diagnosis: { $regex: search, $options: "i" } },
             { treatment: { $regex: search, $options: "i" } },
+            { recordType: { $regex: search, $options: "i" } },
+            { status: { $regex: search, $options: "i" } },
           ],
           ...hospitalFilter,
         }

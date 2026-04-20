@@ -15,7 +15,6 @@ const recordSchema = new Schema<Irecord>(
     personId: {
       type: Schema.Types.ObjectId,
       required: true,
-      index: true,
       refPath: "personModel",
     },
     vitals: {
@@ -28,6 +27,7 @@ const recordSchema = new Schema<Irecord>(
     },
     recordType: {
       type: String,
+      index: true,
       enum: [
         "consultation",
         "lab_result",

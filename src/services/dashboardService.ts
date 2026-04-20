@@ -307,20 +307,23 @@ export const getStaff = async (role: string, hospitalFilter: {}) => {
 
 export const getRecordStats = async (hospitalFilter: {}) => {
   try {
-    const [totalRecord, recordsWithVital] = await Promise.all([
-      Record.countDocuments({ ...hospitalFilter }),
-      Record.countDocuments({
-        $or: [
-          { "vitals.bloodPressure": { $nin: [null, ""] } },
-          { "vitals.pulse": { $nin: [null, ""] } },
-          { "vitals.temperature": { $nin: [null, ""] } },
-          { "vitals.weight": { $nin: [null, ""] } },
-          { "vitals.height": { $nin: [null, ""] } },
-          { "vitals.oxygen": { $nin: [null, ""] } },
-        ],
-        ...hospitalFilter,
-      }),
-    ]);
+    const [totalRecord, recordsWithVital, pendingRecords, labResult] =
+      await Promise.all([
+        Record.countDocuments({ ...hospitalFilter }),
+        Record.countDocuments({
+          $or: [
+            { "vitals.bloodPressure": { $nin: [null, ""] } },
+            { "vitals.pulse": { $nin: [null, ""] } },
+            { "vitals.temperature": { $nin: [null, ""] } },
+            { "vitals.weight": { $nin: [null, ""] } },
+            { "vitals.height": { $nin: [null, ""] } },
+            { "vitals.oxygen": { $nin: [null, ""] } },
+          ],
+          ...hospitalFilter,
+        }),
+        Record.countDocuments({ status: "pending", ...hospitalFilter }),
+        Record.countDocuments({ recordType: "lab_result", ...hospitalFilter }),
+      ]);
     return {
       stats: [
         {
@@ -328,9 +331,11 @@ export const getRecordStats = async (hospitalFilter: {}) => {
           value: totalRecord,
         },
         {
-          title: "Records with Vitals",
+          title: "With Vitals",
           value: recordsWithVital,
         },
+        { title: "Pending Review", value: pendingRecords },
+        { title: "Lab Result", value: labResult },
       ],
     };
   } catch (error) {}

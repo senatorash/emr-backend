@@ -21,7 +21,6 @@ dashboardRouter.get(
 dashboardRouter.get(
   "/record-stats",
   requireSignin,
-  authorizeAdmin,
   hospitalFiltering,
   recordStats,
 );
